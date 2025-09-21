@@ -15,6 +15,7 @@ const (
 
 var testQueries *Queries
 
+// This test will be triggered before all the test inside the db package due to its function name (TestMain)
 func TestMain(m *testing.M) {
 	conn, err := sql.Open(dbDriver, dbSource)
 	if err != nil {

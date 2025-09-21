@@ -22,4 +22,17 @@ migrate_down:
 sqlc:
 	sqlc generate
 
-.PHONY: create_db drop_db postgres db_start db_stop migrate_up migrate_down sqlc
+test:
+	go test -v -cover ./...
+
+test_coverage:
+	go test -v -coverprofile=coverage.out ./...
+
+coverage_report:
+	go tool cover -func=coverage.out
+
+coverage_report_view:
+	go tool cover -html=coverage.out
+
+
+.PHONY: create_db drop_db postgres db_start db_stop migrate_up migrate_down sqlc, test, test_coverage, coverage_report, coverage_report_view
