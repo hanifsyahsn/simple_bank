@@ -34,5 +34,11 @@ coverage_report:
 coverage_report_view:
 	go tool cover -html=coverage.out
 
+server:
+	go run main.go
 
-.PHONY: create_db drop_db postgres db_start db_stop migrate_up migrate_down sqlc, test, test_coverage, coverage_report, coverage_report_view
+mock:
+	mockgen -package mockdb --destination db/mock/store.go github.com/hanifsyahsn/simple_bank/db/sqlc Store
+
+
+.PHONY: create_db drop_db postgres db_start db_stop migrate_up migrate_down sqlc, test, test_coverage, coverage_report, coverage_report_view, server, mock

@@ -2,8 +2,9 @@ package db
 
 import (
 	"context"
-	"github.com/stretchr/testify/require"
 	"testing"
+
+	"github.com/stretchr/testify/require"
 )
 
 func TestTransferTx(t *testing.T) {
