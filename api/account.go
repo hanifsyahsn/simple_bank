@@ -7,11 +7,12 @@ import (
 
 	"github.com/gin-gonic/gin"
 	db "github.com/hanifsyahsn/simple_bank/db/sqlc"
+	"github.com/hanifsyahsn/simple_bank/token"
+	"github.com/lib/pq"
 )
 
 type createAccountRequest struct {
-	Owner    string `json:"owner" binding:"required"`
-	Currency string `json:"currency" binding:"required,oneof=USD EUR"`
+	Currency string `json:"currency" binding:"required,currency"`
 }
 
 func (server *Server) createAccount(c *gin.Context) {
@@ -21,14 +22,26 @@ func (server *Server) createAccount(c *gin.Context) {
 		return
 	}
 
+	authPayload := c.MustGet(authorizationPayloadKey).(*token.Payload)
 	arg := db.CreateAccountParams{
-		Owner:    req.Owner,
+		Owner:    authPayload.Username,
 		Currency: req.Currency,
 		Balance:  0,
 	}
 
 	account, err := server.store.CreateAccount(c.Request.Context(), arg)
 	if err != nil {
+		var e *pq.Error
+		if errors.As(err, &e) {
+			switch e.Code.Name() {
+			case "foreign_key_violation":
+				c.JSON(http.StatusBadRequest, errorResponse(err))
+				return
+			case "unique_violation":
+				c.JSON(http.StatusConflict, errorResponse(err))
+				return
+			}
+		}
 		c.JSON(http.StatusInternalServerError, errorResponse(err))
 		return
 	}
@@ -57,6 +70,13 @@ func (server *Server) getAccount(c *gin.Context) {
 		return
 	}
 
+	authPayload := c.MustGet(authorizationPayloadKey).(*token.Payload)
+	if account.Owner != authPayload.Username {
+		err = errors.New("account does not belong to authenticated user")
+		c.JSON(http.StatusUnauthorized, errorResponse(err))
+		return
+	}
+
 	c.JSON(http.StatusOK, account)
 }
 
@@ -73,7 +93,9 @@ func (server *Server) getAccounts(c *gin.Context) {
 	limit := req.PageSize
 	offset := (req.PageID - 1) * req.PageSize
 
+	authPayload := c.MustGet(authorizationPayloadKey).(*token.Payload)
 	arg := db.ListAccountsParams{
+		Owner:  authPayload.Username,
 		Limit:  limit,
 		Offset: offset,
 	}

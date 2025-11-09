@@ -19,6 +19,12 @@ migrate_up:
 migrate_down:
 	migrate -path db/migration -database "postgresql://postgres:12345@localhost:5432/simple_bank?sslmode=disable" -verbose down
 
+migrate_up1:
+	migrate -path db/migration -database "postgresql://postgres:12345@localhost:5432/simple_bank?sslmode=disable" -verbose up 1
+
+migrate_down1:
+	migrate -path db/migration -database "postgresql://postgres:12345@localhost:5432/simple_bank?sslmode=disable" -verbose down 1
+
 sqlc:
 	sqlc generate
 
@@ -40,5 +46,15 @@ server:
 mock:
 	mockgen -package mockdb --destination db/mock/store.go github.com/hanifsyahsn/simple_bank/db/sqlc Store
 
+DIRE ?=
+NAME ?=
 
-.PHONY: create_db drop_db postgres db_start db_stop migrate_up migrate_down sqlc, test, test_coverage, coverage_report, coverage_report_view, server, mock
+migrate_create:
+	migrate create -ext sql -dir $(DIRE) -seq $(NAME)
+
+PACKAGE ?=
+
+test_package:
+	go test -v -count=1 $(PACKAGE)
+
+.PHONY: create_db drop_db postgres db_start db_stop migrate_up migrate_down sqlc, test, test_coverage, coverage_report, coverage_report_view, server, mock, migrate_create, migrate_up1, migrate_down1, test_package
