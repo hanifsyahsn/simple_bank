@@ -5,7 +5,7 @@ drop_db:
 	docker exec -it simple_bank dropdb -U postgres simple_bank
 
 postgres:
-	docker run --name simple_bank -e POSTGRES_PASSWORD=12345 -e POSTGRES_USER=postgres -e POSTGRES_DB=simple_bank -p 5432:5432 -v simple_bank:/var/lib/postgresql/data -d postgres:9.6
+	docker run --name simple_bank --network bank-network -e POSTGRES_PASSWORD=12345 -e POSTGRES_USER=postgres -e POSTGRES_DB=simple_bank -p 5432:5432 -v simple_bank:/var/lib/postgresql/data -d postgres:9.6
 
 db_start:
 	docker start simple_bank
