@@ -1,8 +1,6 @@
 module github.com/hanifsyahsn/simple_bank
 
-go 1.24.0
-
-toolchain go1.24.9
+go 1.25.3
 
 require (
 	github.com/DATA-DOG/go-sqlmock v1.5.2
